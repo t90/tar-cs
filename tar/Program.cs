@@ -25,7 +25,7 @@ namespace tar
                     }
                     MemoryStream stream = new MemoryStream();
                     StreamWriter writer = new StreamWriter(stream);
-                    writer.WriteLine("This file is created with TarWriter 0.8");
+                    writer.WriteLine("This archive created with tar-cs.");
                     writer.Flush();
                     stream.Position = 0;
                     tar.Write(stream, stream.Length, "README.TXT");
