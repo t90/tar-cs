@@ -91,10 +91,10 @@ namespace tar_cs
             Encoding.ASCII.GetBytes(GroupName).CopyTo(header, 0x129);
             Encoding.ASCII.GetBytes(namePrefix).CopyTo(header, 347);
 
-            if (SizeInBytes >= 0xfffffe)
+            if (SizeInBytes >= 0x1FFFFFFFF)
             {
                 byte[] bytes = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(SizeInBytes));
-                AlignTo12(bytes).CopyTo(header, 124);
+                SetMarker(AlignTo12(bytes)).CopyTo(header, 124);
             }
 
             RecalculateChecksum(header);
@@ -102,11 +102,16 @@ namespace tar_cs
             return header;
         }
 
+        private static byte[] SetMarker(byte[] bytes)
+        {
+            bytes[0] |= 0x80;
+            return bytes;
+        }
+
         private static byte[] AlignTo12(byte[] bytes)
         {
             var retVal = new byte[12];
             bytes.CopyTo(retVal, 12 - bytes.Length);
-            retVal[0] |= 0x80;
             return retVal;
         }
     }

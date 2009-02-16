@@ -47,10 +47,10 @@ namespace tar_cs
         {
             var writer = new DataWriter(OutStream,dataSizeInBytes);
             WriteHeader(name, lastModificationTime, dataSizeInBytes, userName, groupName, mode);
-//            while(writer.CanWrite)
-//            {
-//                writeDelegate(writer);
-//            }
+            while(writer.CanWrite)
+            {
+                writeDelegate(writer);
+            }
             AlignTo512(dataSizeInBytes, false);
         }
 
