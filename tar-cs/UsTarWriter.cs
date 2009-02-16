@@ -1,48 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace tar_cs
 {
     public class UsTarWriter : TarWriter
     {
-        private UsTarHeader header;
 
         public UsTarWriter(Stream writeStream) : base(writeStream)
         {
         }
 
-        protected override ITarHeader GetTarHeader()
+        protected override void WriteHeader(string name, DateTime lastModificationTime, long count, int userId, int groupId, int mode)
         {
-            if(header == null)
-                header = new UsTarHeader();
-            return header;
-        }
-
-        public void Write(Stream data, long dataSizeInBytes, string fileName, string userId, string groupId, int mode, DateTime lastModificationTime)
-        {
-            DirtyHeaderMethod(userId, groupId);
-            Write(data, dataSizeInBytes, fileName, userId.GetHashCode(), groupId.GetHashCode(), mode, lastModificationTime);
-        }
-
-        //@TODO Replace all the header stuff with smth more sane. I need to think about it.
-        private void DirtyHeaderMethod(string userId, string groupId)
-        {
-            ITarHeader iHeader = GetTarHeader();
-            if(iHeader is UsTarHeader)
+            var tarHeader = new UsTarHeader()
             {
-                var h = (UsTarHeader) iHeader;
-                h.UserName = userId;
-                h.GroupName = groupId;
-            }
+                Name = name,
+                LastModification = lastModificationTime,
+                SizeInBytes = count,
+                UserId = userId,
+                UserName = Convert.ToString(userId,8),
+                GroupId = groupId,
+                GroupName = Convert.ToString(groupId,8),
+                Mode = mode
+            };
+            OutStream.Write(tarHeader.GetHeaderValue(), 0, tarHeader.HeaderSize);
         }
 
-        public override void Write(Stream data, long dataSizeInBytes, string name, int userId, int groupId, int mode, DateTime lastModificationTime)
+        protected virtual void WriteHeader(string name, DateTime lastModificationTime, long count, string userName, string groupName, int mode)
         {
-            DirtyHeaderMethod(Convert.ToString(userId,8), Convert.ToString(userId,8));
-            base.Write(data, dataSizeInBytes, name, userId, groupId, mode, lastModificationTime);
+            var tarHeader = new UsTarHeader()
+            {
+                Name = name,
+                LastModification = lastModificationTime,
+                SizeInBytes = count,
+                UserId = userName.GetHashCode(),
+                UserName = userName,
+                GroupId = groupName.GetHashCode(),
+                GroupName = groupName,
+                Mode = mode
+            };
+            OutStream.Write(tarHeader.GetHeaderValue(), 0, tarHeader.HeaderSize);
         }
 
+
+        public virtual void Write(string name, long dataSizeInBytes, string userName, string groupName, int mode, DateTime lastModificationTime, WriteDataDelegate writeDelegate)
+        {
+            var writer = new DataWriter(OutStream,dataSizeInBytes);
+            WriteHeader(name, lastModificationTime, dataSizeInBytes, userName, groupName, mode);
+//            while(writer.CanWrite)
+//            {
+//                writeDelegate(writer);
+//            }
+            AlignTo512(dataSizeInBytes, false);
+        }
+
+
+        public void Write(Stream data, long dataSizeInBytes, string fileName, string userId, string groupId, int mode,
+                          DateTime lastModificationTime)
+        {
+            WriteHeader(fileName,lastModificationTime,dataSizeInBytes,userId, groupId, mode);
+            WriteContent(dataSizeInBytes,data);
+            AlignTo512(dataSizeInBytes,false);
+        }
     }
 }

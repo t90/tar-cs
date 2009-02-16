@@ -55,12 +55,15 @@ namespace tar_cs
             Write(data, dataSizeInBytes, name, 61, 61, 511, DateTime.Now);
         }
 
-        private ITarHeader header = null;
-        protected virtual ITarHeader GetTarHeader()
+        public virtual void Write(string name, long dataSizeInBytes, int userId, int groupId, int mode, DateTime lastModificationTime, WriteDataDelegate writeDelegate)
         {
-            if(header == null)
-                header = new TarHeader();
-            return header;
+            IDataWriter writer = new DataWriter(OutStream, dataSizeInBytes);
+            WriteHeader(name, lastModificationTime, dataSizeInBytes, userId, groupId, mode);
+            while(writer.CanWrite)
+            {
+                writeDelegate(writer);
+            }
+            AlignTo512(dataSizeInBytes, false);
         }
 
         public virtual void Write(Stream data, long dataSizeInBytes, string name, int userId, int groupId, int mode,
@@ -68,15 +71,13 @@ namespace tar_cs
         {
             if(isClosed)
                 throw new TarException("Can not write to the closed writer");
-            long count = dataSizeInBytes;
-            ITarHeader header = GetTarHeader();
-            header.Name = name;
-            header.LastModification = lastModificationTime;
-            header.SizeInBytes = count;
-            header.UserId = userId;
-            header.GroupId = groupId;
-            header.Mode = mode;
-            OutStream.Write(header.GetHeaderValue(), 0, header.HeaderSize);
+            WriteHeader(name, lastModificationTime, dataSizeInBytes, userId, groupId, mode);
+            WriteContent(dataSizeInBytes, data);
+            AlignTo512(dataSizeInBytes,false);
+        }
+
+        protected void WriteContent(long count, Stream data)
+        {
             while (count > 0 && count > buffer.Length)
             {
                 int bytesRead = data.Read(buffer, 0, buffer.Length);
@@ -108,7 +109,21 @@ namespace tar_cs
                 else
                     OutStream.Write(buffer, 0, bytesRead);
             }
-            AlignTo512(dataSizeInBytes,false);
+        }
+
+        protected delegate void WriteHeaderDelegate(ITarHeader header);
+        protected virtual void WriteHeader(string name, DateTime lastModificationTime, long count, int userId, int groupId, int mode)
+        {
+            var header = new TarHeader
+                         {
+                             Name = name,
+                             LastModification = lastModificationTime,
+                             SizeInBytes = count,
+                             UserId = userId,
+                             GroupId = groupId,
+                             Mode = mode
+                         };
+            OutStream.Write(header.GetHeaderValue(), 0, header.HeaderSize);
         }
 
 

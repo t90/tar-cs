@@ -113,7 +113,6 @@ namespace tar_cs
             if (string.IsNullOrEmpty(Name)) throw new TarException("FileName can not be empty.");
             if (Name.Length >= 100) throw new TarException("FileName is too long. It must be less than 100 bytes.");
 
-
             // Fill header
             Encoding.ASCII.GetBytes(AddChars(Name, 100, '\0', false)).CopyTo(buffer, 0);
             Encoding.ASCII.GetBytes(ModeString).CopyTo(buffer, 100);

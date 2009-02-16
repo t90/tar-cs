@@ -36,6 +36,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataWriter.cs" />
+    <Compile Include="IDataWriter.cs" />
     <Compile Include="ITarHeader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TarException.cs" />

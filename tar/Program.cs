@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using tar_cs;
 
@@ -6,6 +7,19 @@ namespace tar
 {
     internal class Program
     {
+        private static IEnumerator<byte []> NextDataBlock(long dataSize)
+        {
+            byte[] buffer = new byte[512];
+            var random = new Random(DateTime.Now.Millisecond);
+            while(dataSize > 512)
+            {
+                random.NextBytes(buffer);
+                dataSize -= 512;
+                yield return buffer;
+            }
+
+        }
+
         private static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -14,6 +28,23 @@ namespace tar
                 return;
             }
 
+            if(args.Length == 2 && args[0] == "--test-big")
+            {
+                using(var file = File.Create(args[1]))
+                using(var tar = new UsTarWriter(file))
+                {
+                    IEnumerator<byte[]> i = NextDataBlock(9255295864);
+
+                    tar.Write("bigFile.bin", 9255295864, "v", "v", 0777, DateTime.Now, delegate(IDataWriter writer)
+                    {
+//                        i.MoveNext();
+//                        byte[] current = i.Current;
+//                        writer.Write(current, current.Length);
+                    });
+                }
+                
+                return;
+            }
 
             using (FileStream archiveFile = File.Create(args[0]))
             {
@@ -31,7 +62,6 @@ namespace tar
                     tar.Write(stream, stream.Length, "README.TXT");
                 }
             }
-
 
             using(var archUsTar = File.Create(args[0]+".ustar.tar"))
             {
