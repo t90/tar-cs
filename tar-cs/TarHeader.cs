@@ -17,7 +17,23 @@ namespace tar_cs
             GroupId = 61; // 101 dec
         }
 
-        public string Name { get; set; }
+        private string name;
+
+        public virtual string Name
+        {
+            get
+            {
+                return name;
+            } 
+            set
+            {
+                if(value.Length > 100)
+                {
+                    throw new TarException("A file name can not be more than 100 chars long");
+                }
+                name = value;
+            }
+        }
         public int Mode { get; set; }
 
         public string ModeString
@@ -84,7 +100,7 @@ namespace tar_cs
         }
 
 
-        public byte[] GetHeaderValue()
+        public virtual byte[] GetHeaderValue()
         {
             // Clean old values
             int i = 0;
@@ -106,20 +122,25 @@ namespace tar_cs
             Encoding.ASCII.GetBytes(SizeString).CopyTo(buffer, 124);
             Encoding.ASCII.GetBytes(LastModificationString).CopyTo(buffer, 136);
 
-            // Set default value for checksum. That is 8 spaces.
-            Encoding.ASCII.GetBytes("        ").CopyTo(buffer, 148);
-
-            // Calculate checksum
-            headerChecksum = 0;
-            foreach (byte b in buffer)
-            {
-                headerChecksum += b;
-            }
+            RecalculateChecksum(buffer);
 
             // Write checksum
             Encoding.ASCII.GetBytes(HeaderChecksumString).CopyTo(buffer, 148);
 
             return buffer;
+        }
+
+        protected virtual void RecalculateChecksum(byte[] buf)
+        {
+// Set default value for checksum. That is 8 spaces.
+            Encoding.ASCII.GetBytes("        ").CopyTo(buf, 148);
+
+            // Calculate checksum
+            headerChecksum = 0;
+            foreach (byte b in buf)
+            {
+                headerChecksum += b;
+            }
         }
     }
 }

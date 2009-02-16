@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B9189786-191B-42C7-8029-244E0DA8DA21}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -41,6 +41,8 @@
     <Compile Include="TarException.cs" />
     <Compile Include="TarHeader.cs" />
     <Compile Include="TarWriter.cs" />
+    <Compile Include="UsTarHeader.cs" />
+    <Compile Include="UsTarWriter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

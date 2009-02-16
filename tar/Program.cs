@@ -31,6 +31,19 @@ namespace tar
                     tar.Write(stream, stream.Length, "README.TXT");
                 }
             }
+
+
+            using(var archUsTar = File.Create(args[0]+".ustar.tar"))
+            {
+                using(var tar = new UsTarWriter(archUsTar))
+                {
+                    for (int i = 1; i < args.Length; ++i)
+                    {
+                        tar.Write(args[i]);
+                    }
+                }
+            }
+
         }
     }
 }

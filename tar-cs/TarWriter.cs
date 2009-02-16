@@ -55,9 +55,12 @@ namespace tar_cs
             Write(data, dataSizeInBytes, name, 61, 61, 511, DateTime.Now);
         }
 
+        private ITarHeader header = null;
         protected virtual ITarHeader GetTarHeader()
         {
-            return new TarHeader();
+            if(header == null)
+                header = new TarHeader();
+            return header;
         }
 
         public virtual void Write(Stream data, long dataSizeInBytes, string name, int userId, int groupId, int mode,
