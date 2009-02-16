@@ -2,7 +2,7 @@ using System.IO;
 
 namespace tar_cs
 {
-    internal class DataWriter : IDataWriter
+    internal class DataWriter : IArchiveDataWriter
     {
         private readonly long size;
         private long remainingBytes;

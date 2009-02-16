@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Text;
 using tar_cs;
 
@@ -18,6 +19,7 @@ namespace tar_cs
         }
 
         private string name;
+        protected readonly DateTime TheEpoch = new DateTime(1970, 1, 1, 0, 0, 0);
 
         public virtual string Name
         {
@@ -69,7 +71,7 @@ namespace tar_cs
             get
             {
                 return AddChars(
-                    ((long) (LastModification - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds).ToString(), 11, '0',
+                    ((long) (LastModification - TheEpoch).TotalSeconds).ToString(), 11, '0',
                     true);
             }
         }
@@ -99,6 +101,33 @@ namespace tar_cs
             return str;
         }
 
+        public byte[] GetBytes()
+        {
+            return buffer;
+        }
+
+        protected virtual bool UpdateHeaderFromBytes()
+        {
+            Name = Encoding.ASCII.GetString(buffer, 0, 100);
+            Mode = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 100, 7), 8);
+            UserId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 108, 7), 8);
+            GroupId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 116, 7), 8);
+            if((buffer[124] & 0x80) == 0x80) // if size in binary
+            {
+                long sizeBigEndian = BitConverter.ToInt64(buffer,0x80);
+                SizeInBytes = IPAddress.NetworkToHostOrder(sizeBigEndian);
+            }
+            else
+            {
+                SizeInBytes = Convert.ToInt64(Encoding.ASCII.GetString(buffer, 124, 11), 8);
+            }
+            long unixTimeStamp = Convert.ToInt64(Encoding.ASCII.GetString(buffer,136,11));
+            LastModification = TheEpoch.AddSeconds(unixTimeStamp);
+
+            var storedChecksum = Convert.ToInt32(Encoding.ASCII.GetString(buffer,148,6));
+            RecalculateChecksum(buffer);
+            return storedChecksum == headerChecksum;
+        }
 
         public virtual byte[] GetHeaderValue()
         {

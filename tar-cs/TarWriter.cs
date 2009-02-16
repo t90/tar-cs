@@ -57,7 +57,7 @@ namespace tar_cs
 
         public virtual void Write(string name, long dataSizeInBytes, int userId, int groupId, int mode, DateTime lastModificationTime, WriteDataDelegate writeDelegate)
         {
-            IDataWriter writer = new DataWriter(OutStream, dataSizeInBytes);
+            IArchiveDataWriter writer = new DataWriter(OutStream, dataSizeInBytes);
             WriteHeader(name, lastModificationTime, dataSizeInBytes, userId, groupId, mode);
             while(writer.CanWrite)
             {

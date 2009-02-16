@@ -12,5 +12,6 @@ namespace tar_cs
         DateTime LastModification { get; set; }
         int HeaderSize { get; }
         byte[] GetHeaderValue();
+        byte[] GetBytes();
     }
 }

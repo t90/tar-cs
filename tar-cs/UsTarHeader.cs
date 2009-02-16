@@ -44,7 +44,7 @@ namespace tar_cs
 
         public override string Name
         {
-            get { return base.Name; }
+            get { return namePrefix + base.Name; }
             set
             {
                 if (value.Length > 100)
@@ -74,6 +74,15 @@ namespace tar_cs
                     base.Name = value;
                 }
             }
+        }
+
+        protected override bool UpdateHeaderFromBytes()
+        {
+            byte[] bytes = GetBytes();
+            UserName = Encoding.ASCII.GetString(bytes, 0x109, 32);
+            GroupName = Encoding.ASCII.GetString(bytes, 0x129, 32);
+            namePrefix = Encoding.ASCII.GetString(bytes, 347, 157);
+            return base.UpdateHeaderFromBytes();
         }
 
         private static bool IsPathSeparator(char ch)
