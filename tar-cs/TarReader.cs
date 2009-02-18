@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace tar_cs
@@ -62,12 +63,15 @@ namespace tar_cs
         /// <seealso cref="MoveNext"/>
         public void Read(Stream dataDestanation)
         {
+            Debug.WriteLine("tar stream position Read in: " + inStream.Position);
             int readBytes;
             byte[] read;
             while ((readBytes = Read(out read)) != -1)
             {
+                Debug.WriteLine("tar stream position Read while(...) : " + inStream.Position);
                 dataDestanation.Write(read, 0, readBytes);
             }
+            Debug.WriteLine("tar stream position Read out: " + inStream.Position);
         }
 
         protected int Read(out byte[] buffer)
@@ -77,12 +81,32 @@ namespace tar_cs
                 buffer = null;
                 return -1;
             }
+            int align512 = -1;
             long toRead = remainingBytesInFile - 512;
 
-            toRead = toRead > 0 ? 512 : remainingBytesInFile;
+            if (toRead > 0) 
+                toRead = 512;
+            else
+            {
+                align512 = 512 - (int)remainingBytesInFile;
+                toRead = remainingBytesInFile;
+            }
+                
 
             int bytesRead = inStream.Read(dataBuffer, 0, (int)toRead);
             remainingBytesInFile -= bytesRead;
+            
+            if(inStream.CanSeek && align512 > 0)
+            {
+                inStream.Seek(align512, SeekOrigin.Current);
+            }
+            else
+                while(align512 > 0)
+                {
+                    inStream.ReadByte();
+                    --align512;
+                }
+                
             buffer = dataBuffer;
             return bytesRead;
         }
@@ -115,6 +139,7 @@ namespace tar_cs
         /// <seealso cref="Read(Stream)"/>
         public bool MoveNext(bool skipData)
         {
+            Debug.WriteLine("tar stream position MoveNext in: " + inStream.Position);
             if (remainingBytesInFile > 0)
             {
                 if (!skipData)
@@ -125,7 +150,8 @@ namespace tar_cs
                 // Skip to the end of file.
                 if (inStream.CanSeek)
                 {
-                    inStream.Seek(remainingBytesInFile + (512 - (remainingBytesInFile%512)), SeekOrigin.Current);
+                    long remainer = (remainingBytesInFile%512);
+                    inStream.Seek(remainingBytesInFile + (512 - (remainer == 0 ? 512 : remainer) ), SeekOrigin.Current);
                 }
                 else
                 {
@@ -149,6 +175,7 @@ namespace tar_cs
                 headerRead = inStream.Read(bytes, 0, header.HeaderSize);
                 if(headerRead == 512 && IsEmpty(bytes))
                 {
+                    Debug.WriteLine("tar stream position MoveNext  out(false): " + inStream.Position);
                     return false;
                 }
                 throw new TarException("Broken archive");
@@ -161,6 +188,7 @@ namespace tar_cs
 
             remainingBytesInFile = header.SizeInBytes;
 
+            Debug.WriteLine("tar stream position MoveNext  out(true): " + inStream.Position);
             return true;
         }
     }

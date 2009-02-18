@@ -18,7 +18,7 @@ namespace tar_cs
 
         public override string UserName
         {
-            get { return userName; }
+            get { return userName.Replace("\0",string.Empty); }
             set
             {
                 if (value.Length > 32)
@@ -31,7 +31,7 @@ namespace tar_cs
 
         public override string GroupName
         {
-            get { return groupName; }
+            get { return groupName.Replace("\0",string.Empty); }
             set
             {
                 if (value.Length > 32)

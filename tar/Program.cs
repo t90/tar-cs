@@ -15,7 +15,7 @@ namespace tar
             }
             using (FileStream archUsTar = File.Create(args[0]))
             {
-                using (var legacyTar = new TarWriter(archUsTar))
+                using (TarWriter legacyTar = new TarWriter(archUsTar))
                 {
                     for (int i = 1; i < args.Length; ++i)
                     {
@@ -23,6 +23,17 @@ namespace tar
                     }
                 }
             }
+
+            Console.WriteLine("Examine tar file: {0}", args[0]);
+            using (FileStream examiner = File.OpenRead(args[0]))
+            {
+                TarReader tar = new TarReader(examiner);
+                while (tar.MoveNext(true))
+                {
+                    Console.WriteLine("File: {0}, Owner: {1}", tar.FileInfo.FileName, tar.FileInfo.UserName);
+                }
+            }
+
             using (FileStream unarchFile = File.OpenRead(args[0]))
             {
                 TarReader reader = new TarReader(unarchFile);
