@@ -26,7 +26,7 @@ namespace tar
             using (FileStream unarchFile = File.OpenRead(args[0]))
             {
                 TarReader reader = new TarReader(unarchFile);
-                reader.ReadAll("out_dir\\data");
+                reader.ReadToEnd("out_dir\\data");
             }
         }
     }
