@@ -43,9 +43,9 @@
     <Compile Include="TarException.cs" />
     <Compile Include="TarHeader.cs" />
     <Compile Include="TarReader.cs" />
-    <Compile Include="TarWriter.cs" />
+    <Compile Include="LegacyTarWriter.cs" />
     <Compile Include="UsTarHeader.cs" />
-    <Compile Include="UsTarWriter.cs" />
+    <Compile Include="TarWriter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

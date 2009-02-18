@@ -15,11 +15,11 @@ namespace tar
             }
             using (FileStream archUsTar = File.Create(args[0]))
             {
-                using (TarWriter tar = new TarWriter(archUsTar))
+                using (var legacyTar = new TarWriter(archUsTar))
                 {
                     for (int i = 1; i < args.Length; ++i)
                     {
-                        tar.Write(args[i]);
+                        legacyTar.Write(args[i]);
                     }
                 }
             }
