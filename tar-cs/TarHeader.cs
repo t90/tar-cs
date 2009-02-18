@@ -18,14 +18,14 @@ namespace tar_cs
             GroupId = 61; // 101 dec
         }
 
-        private string name;
+        private string fileName;
         protected readonly DateTime TheEpoch = new DateTime(1970, 1, 1, 0, 0, 0);
 
-        public virtual string Name
+        public virtual string FileName
         {
             get
             {
-                return name;
+                return fileName.Replace("\0",string.Empty);
             } 
             set
             {
@@ -33,7 +33,7 @@ namespace tar_cs
                 {
                     throw new TarException("A file name can not be more than 100 chars long");
                 }
-                name = value;
+                fileName = value;
             }
         }
         public int Mode { get; set; }
@@ -44,6 +44,11 @@ namespace tar_cs
         }
 
         public int UserId { get; set; }
+        public virtual string UserName
+        {
+            get { return UserId.ToString(); }
+            set { UserId = Int32.Parse(value); }
+        }
 
         public string UserIdString
         {
@@ -51,6 +56,11 @@ namespace tar_cs
         }
 
         public int GroupId { get; set; }
+        public virtual string GroupName
+        {
+            get { return GroupId.ToString(); }
+            set { GroupId = Int32.Parse(value); }
+        }
 
         public string GroupIdString
         {
@@ -106,9 +116,9 @@ namespace tar_cs
             return buffer;
         }
 
-        protected virtual bool UpdateHeaderFromBytes()
+        public virtual bool UpdateHeaderFromBytes()
         {
-            Name = Encoding.ASCII.GetString(buffer, 0, 100);
+            FileName = Encoding.ASCII.GetString(buffer, 0, 100);
             Mode = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 100, 7), 8);
             UserId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 108, 7), 8);
             GroupId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 116, 7), 8);
@@ -139,11 +149,11 @@ namespace tar_cs
                 ++i;
             }
 
-            if (string.IsNullOrEmpty(Name)) throw new TarException("FileName can not be empty.");
-            if (Name.Length >= 100) throw new TarException("FileName is too long. It must be less than 100 bytes.");
+            if (string.IsNullOrEmpty(FileName)) throw new TarException("FileName can not be empty.");
+            if (FileName.Length >= 100) throw new TarException("FileName is too long. It must be less than 100 bytes.");
 
             // Fill header
-            Encoding.ASCII.GetBytes(AddChars(Name, 100, '\0', false)).CopyTo(buffer, 0);
+            Encoding.ASCII.GetBytes(AddChars(FileName, 100, '\0', false)).CopyTo(buffer, 0);
             Encoding.ASCII.GetBytes(ModeString).CopyTo(buffer, 100);
             Encoding.ASCII.GetBytes(UserIdString).CopyTo(buffer, 108);
             Encoding.ASCII.GetBytes(GroupIdString).CopyTo(buffer, 116);

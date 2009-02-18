@@ -16,7 +16,7 @@ namespace tar_cs
         private string namePrefix = string.Empty;
         private string userName;
 
-        public string UserName
+        public override string UserName
         {
             get { return userName; }
             set
@@ -29,7 +29,7 @@ namespace tar_cs
             }
         }
 
-        public string GroupName
+        public override string GroupName
         {
             get { return groupName; }
             set
@@ -42,9 +42,9 @@ namespace tar_cs
             }
         }
 
-        public override string Name
+        public override string FileName
         {
-            get { return namePrefix + base.Name; }
+            get { return namePrefix.Replace("\0", string.Empty) + base.FileName.Replace("\0", string.Empty); }
             set
             {
                 if (value.Length > 100)
@@ -67,16 +67,16 @@ namespace tar_cs
                     if (position == value.Length)
                         position = value.Length - 100;
                     namePrefix = value.Substring(0, position);
-                    base.Name = value.Substring(position, value.Length - position);
+                    base.FileName = value.Substring(position, value.Length - position);
                 }
                 else
                 {
-                    base.Name = value;
+                    base.FileName = value;
                 }
             }
         }
 
-        protected override bool UpdateHeaderFromBytes()
+        public override bool UpdateHeaderFromBytes()
         {
             byte[] bytes = GetBytes();
             UserName = Encoding.ASCII.GetString(bytes, 0x109, 32);

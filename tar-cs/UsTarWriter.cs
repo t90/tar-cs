@@ -14,7 +14,7 @@ namespace tar_cs
         {
             var tarHeader = new UsTarHeader()
             {
-                Name = name,
+                FileName = name,
                 LastModification = lastModificationTime,
                 SizeInBytes = count,
                 UserId = userId,
@@ -30,7 +30,7 @@ namespace tar_cs
         {
             var tarHeader = new UsTarHeader()
             {
-                Name = name,
+                FileName = name,
                 LastModification = lastModificationTime,
                 SizeInBytes = count,
                 UserId = userName.GetHashCode(),

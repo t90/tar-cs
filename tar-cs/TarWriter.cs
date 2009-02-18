@@ -111,12 +111,11 @@ namespace tar_cs
             }
         }
 
-        protected delegate void WriteHeaderDelegate(ITarHeader header);
         protected virtual void WriteHeader(string name, DateTime lastModificationTime, long count, int userId, int groupId, int mode)
         {
             var header = new TarHeader
                          {
-                             Name = name,
+                             FileName = name,
                              LastModification = lastModificationTime,
                              SizeInBytes = count,
                              UserId = userId,
