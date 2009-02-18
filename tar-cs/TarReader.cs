@@ -37,11 +37,11 @@ namespace tar_cs
         /// CAUTION! This method is not safe. It's not tar-bomb proof. 
         /// {see http://en.wikipedia.org/wiki/Tar_(file_format) }
         /// If you are not sure about the source of an archive you extracting,
-        /// then use NextFile and Read and handle paths like ".." and "../.." according
+        /// then use MoveNext and Read and handle paths like ".." and "../.." according
         /// to your business logic.
         public void ReadToEnd(string destDirectory)
         {
-            while (NextFile(false))
+            while (MoveNext(false))
             {
                 string totalPath = destDirectory + Path.DirectorySeparatorChar + Header.FileName;
                 string fileName = Path.GetFileName(totalPath);
@@ -59,7 +59,7 @@ namespace tar_cs
         /// </summary>
         /// <param name="dataDestanation">A stream to read data to</param>
         /// 
-        /// <seealso cref="NextFile"/>
+        /// <seealso cref="MoveNext"/>
         public void Read(Stream dataDestanation)
         {
             int readBytes;
@@ -108,12 +108,12 @@ namespace tar_cs
         /// <returns>false on End Of File otherwise true</returns>
         /// 
         /// Example:
-        /// while(NextFile())
+        /// while(MoveNext())
         /// { 
         ///     Read(dataDestStream); 
         /// }
         /// <seealso cref="Read(Stream)"/>
-        public bool NextFile(bool skipData)
+        public bool MoveNext(bool skipData)
         {
             if (remainingBytesInFile > 0)
             {
