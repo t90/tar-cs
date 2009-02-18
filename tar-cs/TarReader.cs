@@ -23,7 +23,7 @@ namespace tar_cs
             header = new UsTarHeader();
         }
 
-        public ITarHeader Header
+        public ITarHeader FileInfo
         {
             get { return header; }
         }
@@ -43,7 +43,7 @@ namespace tar_cs
         {
             while (MoveNext(false))
             {
-                string totalPath = destDirectory + Path.DirectorySeparatorChar + Header.FileName;
+                string totalPath = destDirectory + Path.DirectorySeparatorChar + FileInfo.FileName;
                 string fileName = Path.GetFileName(totalPath);
                 string directory = totalPath.Remove(totalPath.Length - fileName.Length);
                 Directory.CreateDirectory(directory);
