@@ -136,7 +136,30 @@ namespace tar_cs
 
             var storedChecksum = Convert.ToInt32(Encoding.ASCII.GetString(buffer,148,6));
             RecalculateChecksum(buffer);
+            if (storedChecksum == headerChecksum)
+            {
+                return true;
+            }
+
+            RecalculateAltChecksum(buffer);
             return storedChecksum == headerChecksum;
+        }
+
+        private void RecalculateAltChecksum(byte[] buf)
+        {
+            Encoding.ASCII.GetBytes("        ").CopyTo(buf, 148);
+            headerChecksum = 0;
+            foreach(byte b in buf)
+            {
+                if((b & 0x80) == 0x80)
+                {
+                    headerChecksum -= b ^ 0x80;
+                }
+                else
+                {
+                    headerChecksum += b;
+                }
+            }
         }
 
         public virtual byte[] GetHeaderValue()
