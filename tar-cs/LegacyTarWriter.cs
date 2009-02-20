@@ -35,8 +35,56 @@ namespace tar_cs
 
         #endregion
 
+
+        public void WriteDirectoryEntry(string path)
+        {
+            if(string.IsNullOrEmpty(path))
+                throw new ArgumentNullException("path");
+            if (path[path.Length - 1] != '/')
+            {
+                path += '/';
+            }
+            DateTime lastWriteTime;
+            if(Directory.Exists(path))
+            {
+                lastWriteTime = Directory.GetLastWriteTime(path);
+            }
+            else
+            {
+                lastWriteTime = DateTime.Now;
+            }
+            WriteHeader(path, lastWriteTime, 0, 101, 101, 0777, EntryType.Directory);
+        }
+
+        public void WriteDirectory(string directory, bool doRecursive)
+        {
+            if (string.IsNullOrEmpty(directory))
+                throw new ArgumentNullException("directory");
+
+            WriteDirectoryEntry(directory);
+
+            string[] files = Directory.GetFiles(directory);
+            foreach(var fileName in files)
+            {
+                Write(fileName);
+            }
+
+            string[] directories = Directory.GetDirectories(directory);
+            foreach(var dirName in directories)
+            {
+                WriteDirectoryEntry(dirName);
+                if(doRecursive)
+                {
+                    WriteDirectory(dirName,true);
+                }
+            }
+        }
+
+
         public void Write(string fileName)
         {
+            if(string.IsNullOrEmpty(fileName))
+                throw new ArgumentNullException("fileName");
             using (FileStream file = File.OpenRead(fileName))
             {
                 Write(file, file.Length, fileName, 61, 61, 511, File.GetLastWriteTime(file.Name));
@@ -58,7 +106,7 @@ namespace tar_cs
         public virtual void Write(string name, long dataSizeInBytes, int userId, int groupId, int mode, DateTime lastModificationTime, WriteDataDelegate writeDelegate)
         {
             IArchiveDataWriter writer = new DataWriter(OutStream, dataSizeInBytes);
-            WriteHeader(name, lastModificationTime, dataSizeInBytes, userId, groupId, mode);
+            WriteHeader(name, lastModificationTime, dataSizeInBytes, userId, groupId, mode, EntryType.File);
             while(writer.CanWrite)
             {
                 writeDelegate(writer);
@@ -71,7 +119,7 @@ namespace tar_cs
         {
             if(isClosed)
                 throw new TarException("Can not write to the closed writer");
-            WriteHeader(name, lastModificationTime, dataSizeInBytes, userId, groupId, mode);
+            WriteHeader(name, lastModificationTime, dataSizeInBytes, userId, groupId, mode, EntryType.File);
             WriteContent(dataSizeInBytes, data);
             AlignTo512(dataSizeInBytes,false);
         }
@@ -111,7 +159,7 @@ namespace tar_cs
             }
         }
 
-        protected virtual void WriteHeader(string name, DateTime lastModificationTime, long count, int userId, int groupId, int mode)
+        protected virtual void WriteHeader(string name, DateTime lastModificationTime, long count, int userId, int groupId, int mode, EntryType entryType)
         {
             var header = new TarHeader
                          {
@@ -120,7 +168,8 @@ namespace tar_cs
                              SizeInBytes = count,
                              UserId = userId,
                              GroupId = groupId,
-                             Mode = mode
+                             Mode = mode,
+                             EntryType = entryType
                          };
             OutStream.Write(header.GetHeaderValue(), 0, header.HeaderSize);
         }

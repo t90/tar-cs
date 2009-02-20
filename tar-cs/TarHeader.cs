@@ -21,6 +21,8 @@ namespace tar_cs
 
         private string fileName;
         protected readonly DateTime TheEpoch = new DateTime(1970, 1, 1, 0, 0, 0);
+        public EntryType EntryType { get; set; }
+
 
         public virtual string FileName
         {
@@ -81,9 +83,8 @@ namespace tar_cs
         {
             get
             {
-                return AddChars(
-                    ((long) (LastModification - TheEpoch).TotalSeconds).ToString(), 11, '0',
-                    true);
+                var unixTimeStamp = (long)(LastModification - TheEpoch).TotalSeconds;
+                return AddChars(Convert.ToString(unixTimeStamp,8), 11, '0',true);
             }
         }
 
@@ -123,6 +124,9 @@ namespace tar_cs
             Mode = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 100, 7), 8);
             UserId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 108, 7), 8);
             GroupId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 116, 7), 8);
+
+            EntryType = (EntryType)buffer[156];
+
             if((buffer[124] & 0x80) == 0x80) // if size in binary
             {
                 long sizeBigEndian = BitConverter.ToInt64(buffer,0x80);
@@ -183,6 +187,10 @@ namespace tar_cs
             Encoding.ASCII.GetBytes(GroupIdString).CopyTo(buffer, 116);
             Encoding.ASCII.GetBytes(SizeString).CopyTo(buffer, 124);
             Encoding.ASCII.GetBytes(LastModificationString).CopyTo(buffer, 136);
+
+//            buffer[156] = 20;
+            buffer[156] = ((byte) EntryType);
+
 
             RecalculateChecksum(buffer);
 

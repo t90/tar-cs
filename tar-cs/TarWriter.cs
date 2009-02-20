@@ -10,7 +10,7 @@ namespace tar_cs
         {
         }
 
-        protected override void WriteHeader(string name, DateTime lastModificationTime, long count, int userId, int groupId, int mode)
+        protected override void WriteHeader(string name, DateTime lastModificationTime, long count, int userId, int groupId, int mode, EntryType entryType)
         {
             var tarHeader = new UsTarHeader()
             {
@@ -21,7 +21,8 @@ namespace tar_cs
                 UserName = Convert.ToString(userId,8),
                 GroupId = groupId,
                 GroupName = Convert.ToString(groupId,8),
-                Mode = mode
+                Mode = mode,
+                EntryType = entryType
             };
             OutStream.Write(tarHeader.GetHeaderValue(), 0, tarHeader.HeaderSize);
         }

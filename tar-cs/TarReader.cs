@@ -46,7 +46,7 @@ namespace tar_cs
             {
                 string fileNameFromArchive = FileInfo.FileName;
                 string totalPath = destDirectory + Path.DirectorySeparatorChar + fileNameFromArchive;
-                if(UsTarHeader.IsPathSeparator(fileNameFromArchive[fileNameFromArchive.Length -1]))
+                if(UsTarHeader.IsPathSeparator(fileNameFromArchive[fileNameFromArchive.Length -1]) || FileInfo.EntryType == EntryType.Directory)
                 {
                     // Record is a directory
                     Directory.CreateDirectory(totalPath);

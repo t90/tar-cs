@@ -14,12 +14,14 @@ namespace tar
                 return;
             }
             using (var archUsTar = File.Create(args[0]))
-            using (var legacyTar = new TarWriter(archUsTar))
+            using (var tar = new TarWriter(archUsTar))
             {
+                tar.WriteDirectoryEntry("test_dir");
                 for (int i = 1; i < args.Length; ++i)
                 {
-                    legacyTar.Write(args[i]);
+                    tar.Write(args[i]);
                 }
+                
             }
 
             Console.WriteLine("Examine tar file: {0}", args[0]);
