@@ -85,7 +85,7 @@ namespace tar_cs
             return base.UpdateHeaderFromBytes();
         }
 
-        private static bool IsPathSeparator(char ch)
+        internal static bool IsPathSeparator(char ch)
         {
             return (ch == '\\' || ch == '/' || ch == '|'); // All the path separators I ever met.
         }
