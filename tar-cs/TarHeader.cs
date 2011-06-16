@@ -121,9 +121,10 @@ namespace tar_cs
         public virtual bool UpdateHeaderFromBytes()
         {
             FileName = Encoding.ASCII.GetString(buffer, 0, 100);
-            Mode = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 100, 7), 8);
-            UserId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 108, 7), 8);
-            GroupId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 116, 7), 8);
+            // thanks to Shasha Alperocivh. Trimming nulls.
+            Mode = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 100, 7).Trim(), 8);
+            UserId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 108, 7).Trim(), 8);
+            GroupId = Convert.ToInt32(Encoding.ASCII.GetString(buffer, 116, 7).Trim(), 8);
 
             EntryType = (EntryType)buffer[156];
 
