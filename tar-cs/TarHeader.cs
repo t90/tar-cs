@@ -137,7 +137,7 @@ namespace tar_cs
             {
                 SizeInBytes = Convert.ToInt64(Encoding.ASCII.GetString(buffer, 124, 11), 8);
             }
-            long unixTimeStamp = Convert.ToInt64(Encoding.ASCII.GetString(buffer,136,11));
+            long unixTimeStamp = Convert.ToInt64(Encoding.ASCII.GetString(buffer,136,11),8);
             LastModification = TheEpoch.AddSeconds(unixTimeStamp);
 
             var storedChecksum = Convert.ToInt32(Encoding.ASCII.GetString(buffer,148,6));
