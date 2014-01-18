@@ -83,7 +83,7 @@ namespace tar_cs
         {
             get
             {
-                return ((long)(LastModification - TheEpoch).TotalSeconds).ToString("D11");
+                return Convert.ToString((long)(LastModification - TheEpoch).TotalSeconds, 8).PadLeft(11, '0');
             }
         }
 
