@@ -10,7 +10,7 @@ namespace tar_cs
     internal class UsTarHeader : TarHeader
     {
         private const string magic = "ustar";
-        private const string version = "  ";
+        private const string version = "00";
         private string groupName;
 
         private string namePrefix = string.Empty;
@@ -95,7 +95,7 @@ namespace tar_cs
             byte[] header = base.GetHeaderValue();
 
             Encoding.ASCII.GetBytes(magic).CopyTo(header, 0x101); // Mark header as ustar
-            Encoding.ASCII.GetBytes(version).CopyTo(header, 0x106);
+            Encoding.ASCII.GetBytes(version).CopyTo(header, 0x107);
             Encoding.ASCII.GetBytes(UserName).CopyTo(header, 0x109);
             Encoding.ASCII.GetBytes(GroupName).CopyTo(header, 0x129);
             Encoding.ASCII.GetBytes(namePrefix).CopyTo(header, 347);
