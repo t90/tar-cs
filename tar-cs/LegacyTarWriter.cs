@@ -36,16 +36,16 @@ namespace tar_cs
         #endregion
 
 
-        public void WriteDirectoryEntry(string path)
+        public void WriteDirectoryEntry(string path,int userId, int groupId, int mode)
         {
-            if(string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException("path");
             if (path[path.Length - 1] != '/')
             {
                 path += '/';
             }
             DateTime lastWriteTime;
-            if(Directory.Exists(path))
+            if (Directory.Exists(path))
             {
                 lastWriteTime = Directory.GetLastWriteTime(path);
             }
@@ -53,7 +53,12 @@ namespace tar_cs
             {
                 lastWriteTime = DateTime.Now;
             }
-            WriteHeader(path, lastWriteTime, 0, 101, 101, 0777, EntryType.Directory);
+            WriteHeader(path, lastWriteTime, 0, userId, groupId, mode, EntryType.Directory);
+        }
+
+        public void WriteDirectoryEntry(string path)
+        {
+            WriteDirectoryEntry(path, 101, 101, 0777);
         }
 
         public void WriteDirectory(string directory, bool doRecursive)
