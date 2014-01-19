@@ -71,12 +71,15 @@ namespace tar_cs
         /// <seealso cref="MoveNext"/>
         public void Read(Stream dataDestanation)
         {
+
             int readBytes;
             byte[] read;
             while ((readBytes = Read(out read)) != -1)
             {
+
                 dataDestanation.Write(read, 0, readBytes);
             }
+
         }
 
         protected int Read(out byte[] buffer)
@@ -96,10 +99,16 @@ namespace tar_cs
                 align512 = 512 - (int)remainingBytesInFile;
                 toRead = remainingBytesInFile;
             }
-                
 
-            int bytesRead = inStream.Read(dataBuffer, 0, (int)toRead);
-            remainingBytesInFile -= bytesRead;
+            int bytesRead = 0;
+            long bytesRemainingToRead = toRead;
+            do
+            {
+
+                bytesRead = inStream.Read(dataBuffer, (int)(toRead-bytesRemainingToRead), (int)bytesRemainingToRead);
+                bytesRemainingToRead -= bytesRead;
+                remainingBytesInFile -= bytesRead;
+            } while (bytesRead < toRead && bytesRemainingToRead > 0);
             
             if(inStream.CanSeek && align512 > 0)
             {
@@ -144,6 +153,7 @@ namespace tar_cs
         /// <seealso cref="Read(Stream)"/>
         public bool MoveNext(bool skipData)
         {
+
             if (remainingBytesInFile > 0)
             {
                 if (!skipData)
@@ -160,24 +170,40 @@ namespace tar_cs
                 else
                 {
                     byte[] buffer;
-                    while (Read(out buffer) != -1)
+
+                    while (Read(out buffer) > 0)
                     {
                     }
                 }
             }
 
             byte[] bytes = header.GetBytes();
-
-            int headerRead = inStream.Read(bytes, 0, header.HeaderSize);
-            if (headerRead < 512)
+            int headerRead;
+            int bytesRemaining = header.HeaderSize;
+            do
             {
-                throw new TarException("Can not read header");
-            }
+                headerRead = inStream.Read(bytes, header.HeaderSize - bytesRemaining, bytesRemaining);
+                bytesRemaining -= headerRead;
+                if (headerRead <= 0 && bytesRemaining > 0)
+                {
+                    throw new TarException("Can not read header");
+                }
+            } while (bytesRemaining > 0);
 
             if(IsEmpty(bytes))
             {
-                headerRead = inStream.Read(bytes, 0, header.HeaderSize);
-                if(headerRead == 512 && IsEmpty(bytes))
+                bytesRemaining = header.HeaderSize;
+                do
+                {
+                    headerRead = inStream.Read(bytes, header.HeaderSize - bytesRemaining, bytesRemaining);
+                    bytesRemaining -= headerRead;
+                    if (headerRead <= 0 && bytesRemaining > 0)
+                    {
+                        throw new TarException("Broken archive");
+                    }
+                    
+                } while (bytesRemaining > 0);
+                if (bytesRemaining == 0 && IsEmpty(bytes))
                 {
                     Debug.WriteLine("tar stream position MoveNext  out(false): " + inStream.Position);
                     return false;
@@ -191,6 +217,7 @@ namespace tar_cs
             }
 
             remainingBytesInFile = header.SizeInBytes;
+
 
             return true;
         }
